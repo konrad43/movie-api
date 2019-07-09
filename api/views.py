@@ -1,8 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from rest_framework import viewsets, status
+from django.db.models import Count
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 import requests
+
+from django.db.models.expressions import Window
+from django.db.models.functions.window import RowNumber
 
 from .serializers import MovieSerializer, CommentSerializer, TopSerializer
 from .models import Movie, Rating, Comments
@@ -16,11 +20,11 @@ class MovieViewSet(viewsets.ModelViewSet):
     serializer_class = MovieSerializer
 
     def create(self, request, *args, **kwargs):
-        if Movie.objects.get(Title__iexact=request.data['title']):
+        if Movie.objects.all().filter(Title__iexact=request.data['title']):
             return Response('Movie already exists')
 
+        # get data from imdb api
         title = request.data['title'].replace(' ', '+').lower()
-        # check if imdb api works
         params = {
             'apikey': API_KEY,
             't': title
@@ -41,8 +45,14 @@ class MovieViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentSerializer
+    # filterset_fields = ('movie_id',)
 
 
 class TopViewSet(viewsets.ModelViewSet):
-    queryset = Movie.objects.all()
+    queryset = (
+        Movie.objects
+            .annotate(total_comments=Count('comments'))
+            .order_by('-total_comments')
+            # .annotate(rank=Window(expression=RowNumber()))
+    )
     serializer_class = TopSerializer

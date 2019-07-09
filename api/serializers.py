@@ -1,3 +1,4 @@
+from django.db.models.aggregates import Count
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -30,10 +31,23 @@ class MovieSerializer(serializers.ModelSerializer):
 
 class TopSerializer(serializers.ModelSerializer):
     total_comments = serializers.SerializerMethodField()
+    rank = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
-        fields = ('id', 'total_comments')
+        fields = ('Title', 'id', 'total_comments', 'rank')
 
     def get_total_comments(self, obj):
         return obj.comments.count()
+
+    def get_rank(self, obj):
+        sorted_movies = (
+            Movie.objects
+                .annotate(total_comments=Count('comments'))
+                .order_by('-total_comments')
+        )
+        for i, val in enumerate(sorted_movies):
+            if obj.Title == val.Title:
+                return i + 1
+        # return obj.get_rank_data()
+

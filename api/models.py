@@ -2,7 +2,7 @@ from django.db import models
 
 class Movie(models.Model):
     Title = models.CharField(max_length=200)
-    Year = models.IntegerField()
+    Year = models.CharField(max_length=50, blank=True, null=True)
     Rated = models.CharField(max_length=50, blank=True, null=True)
     Released = models.CharField(max_length=200, blank=True, null=True)
     Genre = models.CharField(max_length=200, blank=True, null=True)
@@ -25,9 +25,13 @@ class Movie(models.Model):
     Website = models.CharField(max_length=200, blank=True, null=True)
     Response = models.CharField(max_length=200, blank=True, null=True)
     Runtime = models.CharField(max_length=200, blank=True, null=True)
+    totalSeasons = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return self.Title
+
+    def get_test_data(self):
+        return 10
 
 
 class Rating(models.Model):
@@ -39,5 +43,6 @@ class Rating(models.Model):
 
 class Comments(models.Model):
     comment = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE,
                               related_name='comments')
