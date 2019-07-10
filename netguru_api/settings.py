@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '#jwoe&e_des)p=9znc(#@j^^=zkqu1x61@p2s+5%4%ze1g8gnb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['movie-api-net.herokuapp.com']
 
 
 # Application definition
