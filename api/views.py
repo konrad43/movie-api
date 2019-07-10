@@ -1,12 +1,7 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from django.db.models import Count
-from rest_framework import viewsets, status, filters
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 import requests
-
-from django.db.models.expressions import Window
-from django.db.models.functions.window import RowNumber
 
 from .serializers import MovieSerializer, CommentSerializer, TopSerializer
 from .models import Movie, Rating, Comments
@@ -45,14 +40,25 @@ class MovieViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentSerializer
-    # filterset_fields = ('movie_id',)
+    filterset_fields = ('movie_id',)
 
 
 class TopViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Movie.objects
-            .annotate(total_comments=Count('comments'))
-            .order_by('-total_comments')
-            # .annotate(rank=Window(expression=RowNumber()))
-    )
     serializer_class = TopSerializer
+    queryset = Movie.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        date = request.query_params['date']
+
+        queryset = (
+            Movie.objects
+                .filter(comments__created__gte=date)
+                .annotate(total_comments=Count('id'))
+                .order_by('-total_comments')
+        )
+        # | (
+        #     Movie.objects.annotate(total_comments=Count('comments'))
+        #         .filter(total_comments=0)
+        # )
+        serializer = TopSerializer(queryset, many=True)
+        return Response(serializer.data)

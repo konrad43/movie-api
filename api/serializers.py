@@ -35,19 +35,25 @@ class TopSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ('Title', 'id', 'total_comments', 'rank')
+        fields = ('id', 'total_comments', 'rank')
 
     def get_total_comments(self, obj):
-        return obj.comments.count()
+        return obj.total_comments
 
     def get_rank(self, obj):
-        sorted_movies = (
-            Movie.objects
-                .annotate(total_comments=Count('comments'))
-                .order_by('-total_comments')
-        )
-        for i, val in enumerate(sorted_movies):
+        for i, val in enumerate(self.instance):
             if obj.Title == val.Title:
-                return i + 1
-        # return obj.get_rank_data()
+                if i == 0:
+                    obj.rank = 1
+                    break
+                else:
+                    prev_obj = self.instance[i - 1]
+                    if obj.total_comments == prev_obj.total_comments:
+                        obj.rank = prev_obj.rank
+                        break
+                    else:
+                        obj.rank = prev_obj.rank + 1
+                        break
+        return obj.rank
+
 

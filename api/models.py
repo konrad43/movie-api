@@ -30,9 +30,6 @@ class Movie(models.Model):
     def __str__(self):
         return self.Title
 
-    def get_test_data(self):
-        return 10
-
 
 class Rating(models.Model):
     Source = models.CharField(max_length=200)
