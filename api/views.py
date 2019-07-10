@@ -48,7 +48,9 @@ class TopViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
 
     def list(self, request, *args, **kwargs):
-        date = request.query_params['date']
+        date = request.query_params.get('date', None)
+        if date is None:
+            return Response('You should specify a date')
 
         queryset = (
             Movie.objects

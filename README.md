@@ -23,6 +23,10 @@ Allows filtering comments by associated movie, by passing its ID.
 GET /top:
 
 Should return top movies already present in the database ranking based
-on a number of comments added to the movie.
+on a number of comments added to the movie in the
+specified date range.
+ 
+Query param format: {'date': <YYYY-MM-DD>}
+
 Movies with the same number of comments should have the same
 position in the ranking.
